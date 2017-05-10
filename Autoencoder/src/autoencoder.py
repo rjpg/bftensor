@@ -4,6 +4,7 @@ Created on 13/04/2017
 @author: birinhos
 '''
 
+
 from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
