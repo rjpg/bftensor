@@ -39,7 +39,7 @@ tf.logging.set_verbosity(tf.logging.INFO)
 print(tf.VERSION)
 
 
-df = pd.read_csv('../NNNormalizeData-out.csv')
+df = pd.read_csv('../NNNormalizeData-out.csv',header=None)
 
 np.random.seed(42) # always shuffle the same way 
 df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
