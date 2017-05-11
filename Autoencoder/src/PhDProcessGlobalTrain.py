@@ -19,6 +19,7 @@ from sklearn import metrics
 from sklearn.cross_validation import train_test_split
 from tensorflow.contrib import layers
 
+
 def get_model_dir(name,erase):
     #base_path = os.path.join(".","dnn")
     model_dir = name #os.path.join(base_path,name)
