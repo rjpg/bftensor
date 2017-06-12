@@ -28,6 +28,13 @@ def get_model_dir(name,erase):
         shutil.rmtree(model_dir,ignore_errors=True) # be careful, this deletes everything below the specified path
     return model_dir
 
+
+def split_list(a_list):
+    half = len(a_list)/2
+    print (half)
+    return a_list[:half], a_list[half:]
+
+
 tf.logging.set_verbosity(tf.logging.INFO) # ts logging to normal 
 #logging.getLogger().setLevel(logging.INFO) # print train evolution
 
@@ -37,7 +44,7 @@ np_dir_process = dir_process.as_matrix()
 print("Number of models to process : %d" %np_dir_process.shape[0])
 
 #for x in range(0, np_dir_process.shape[0]):
-x=208
+x=210
 print("Processing category %d" %np_dir_process[x][0])
 #print(np_dir_process[x][1])
 
@@ -51,9 +58,9 @@ print(file_path)
 #Read training file 
 df = pd.read_csv(file_path,header=None)
 
-np.random.seed(42) # always shuffle the same way 
-df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
-df.reset_index(inplace=True, drop=True)
+#np.random.seed(42) # always shuffle the same way 
+#df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
+#df.reset_index(inplace=True, drop=True)
 
 inputs = []
 target = []
@@ -67,9 +74,35 @@ for i in df.columns:
         target.append(i)
     y+=1
 
+
+
 total_inputs,total_output = df.as_matrix(inputs).astype(np.float32),df.as_matrix([target]).astype(np.int32)
 
-train_inputs, test_inputs, train_output, test_output = train_test_split(total_inputs, total_output, test_size=0.2, random_state=42)
+
+train_inputs, test_inputs, train_output, test_output = train_test_split(total_inputs, total_output, test_size=0.2)#, random_state=42)
+
+
+file_path_test = os.path.join(np_dir_process[x][1],"NNNTestNormalizeData-out.csv")
+
+print(base_path)
+print(file_path)
+
+#Read training file 
+df_test = pd.read_csv(file_path_test,header=None)
+
+inputs = []
+target = []
+
+y=0;    
+for i in df.columns:
+    if y != 35 :
+        #print("added %d" %y)
+        inputs.append(i)
+    else :
+        target.append(i)
+    y+=1
+
+total_inputs_test,total_output_test = df_test.as_matrix(inputs).astype(np.float32),df_test.as_matrix([target]).astype(np.int32)
 
 print("Total number of examples %d" %(total_inputs.shape[0]+1))
 print("Train number of examples %d" %(train_inputs.shape[0]+1))
@@ -81,7 +114,7 @@ feature_columns = [tf.contrib.layers.real_valued_column("", dimension=train_inpu
 
 training_steps = 40000
 save_checkpoints_steps=400 # used to run the early stopping monitor 
-early_stopping_rounds=2000   # after 50 SPETS if "loss" doesn't improve stop the train
+early_stopping_rounds=5000   # after 50 SPETS if "loss" doesn't improve stop the train
 batch_size=int((train_inputs.shape[0]+1)/20) # train number of examples / 10 - 10 batch = 1 epoch
 
 classifier = learn.DNNClassifier(hidden_units=[100, 50, 20], n_classes=5
@@ -103,8 +136,8 @@ classifier = learn.DNNClassifier(hidden_units=[100, 50, 20], n_classes=5
 #early stopping using validation monitor 
 print("configuring early stopping")
 validation_monitor = tf.contrib.learn.monitors.ValidationMonitor(
-    x=test_inputs,
-    y=test_output,
+    x=total_inputs_test,
+    y=total_output_test,
     #every_n_steps=200,  # when to run the monitor - not working - forcing with save_checkpoints_steps
     early_stopping_metric="accuracy",         #"accuracy" or "loss"
     early_stopping_metric_minimize=False,     #False Maximize accuracy (True is minimize applied to loss)  
@@ -112,7 +145,7 @@ validation_monitor = tf.contrib.learn.monitors.ValidationMonitor(
 
 print("Fit will start...")
 #classifier = learn.SKCompat(classifier) # For Sklearn compatibility
-classifier.fit(train_inputs, train_output, steps=training_steps , 
+classifier.fit(total_inputs, total_output, steps=training_steps , 
                batch_size=batch_size,
                monitors=[validation_monitor])
 print("Fit is finish...")
@@ -127,5 +160,11 @@ classifier.export_savedmodel(export_dir_base=final_model_dir, serving_input_fn =
 
 
 
+#--------------------------------- final test ---------------------------------
 
-    
+
+
+# Measure accuracy
+pred = list(classifier.predict(total_inputs_test, as_iterable=True))
+score = metrics.accuracy_score(total_output_test, pred)
+print("Accuarcy after load: {}".format(score))
