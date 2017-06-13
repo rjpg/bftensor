@@ -3,7 +3,7 @@ from keras import backend as K
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
-from keras.layers.core import Activation
+from keras.layers.core import Activation, Dropout
 from keras.layers.core import Flatten
 from keras.layers.core import Dense
 from keras.datasets import mnist
@@ -12,8 +12,8 @@ from keras.optimizers import SGD, RMSprop, Adam
 import numpy as np
 import pandas as pd
 from sklearn.cross_validation import train_test_split
-
 import matplotlib.pyplot as plt
+from keras.callbacks import TensorBoard
 
 np.random.seed(1671)  # for reproducibility
 
@@ -26,20 +26,22 @@ class LeNet:
 		model.add(Conv2D(20, kernel_size=5, padding="same",
 			input_shape=input_shape))
 		model.add(Activation("relu"))
-		model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+		model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1)))
 		# CONV => RELU => POOL
-		model.add(Conv2D(50, kernel_size=5, padding="same"))
+		model.add(Conv2D(50, kernel_size=3, padding="same"))
 		model.add(Activation("relu"))
-		model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+		model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1)))
+		model.add(Dropout(0.1))
 		# Flatten => RELU layers
 		model.add(Flatten())
 		model.add(Dense(500))
 		model.add(Activation("relu"))
+		model.add(Dropout(0.5))
  
 		# a softmax classifier
 		model.add(Dense(classes))
 		model.add(Activation("softmax"))
-
+		#model.add(Dropout(0.3))
 		return model
 
 #------------- load Data ----------------
@@ -70,13 +72,13 @@ print('---------------------------')
 print(total_inputs)
 
 #X_train, y_train , X_test, y_test
-X_train, y_train, X_test, y_test = train_test_split(total_inputs, total_output, test_size=0.2, random_state=42)
+X_train, X_test, y_train , y_test = train_test_split(total_inputs, total_output, test_size=0.2, random_state=42)
 
 #-------------- End Load Data -----------
 
 
 # network and training
-NB_EPOCH = 5
+NB_EPOCH = 40
 BATCH_SIZE = 128
 VERBOSE = 1
 OPTIMIZER = Adam()
@@ -114,9 +116,11 @@ model = LeNet.build(input_shape=INPUT_SHAPE, classes=NB_CLASSES)
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
 	metrics=["accuracy"])
 
+tbCallBack = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
+
 history = model.fit(X_train, y_train, 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
-		verbose=VERBOSE, validation_split=VALIDATION_SPLIT)
+		verbose=VERBOSE, validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack])
 
 score = model.evaluate(X_test, y_test, verbose=VERBOSE)
 print("\nTest score:", score[0])
