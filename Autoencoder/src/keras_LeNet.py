@@ -14,7 +14,8 @@ import pandas as pd
 from sklearn.cross_validation import train_test_split
 import matplotlib.pyplot as plt
 from keras.callbacks import TensorBoard
-
+from keras.callbacks import EarlyStopping
+from keras.callbacks import ReduceLROnPlateau
 np.random.seed(1671)  # for reproducibility
 
 #define the convnet 
@@ -37,7 +38,9 @@ class LeNet:
 		model.add(Dense(500))
 		model.add(Activation("relu"))
 		model.add(Dropout(0.5))
- 
+		model.add(Dense(200))
+		model.add(Activation("relu"))
+		model.add(Dropout(0.8))
 		# a softmax classifier
 		model.add(Dense(classes))
 		model.add(Activation("softmax"))
@@ -77,8 +80,8 @@ X_train, X_test, y_train , y_test = train_test_split(total_inputs, total_output,
 #-------------- End Load Data -----------
 
 
+NB_EPOCH = 60
 # network and training
-NB_EPOCH = 40
 BATCH_SIZE = 128
 VERBOSE = 1
 OPTIMIZER = Adam()
@@ -117,10 +120,12 @@ model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
 	metrics=["accuracy"])
 
 tbCallBack = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
+esCallBack = EarlyStopping(monitor='val_acc', min_delta=0, patience=5, verbose=0, mode='max')
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=0.001)
 
 history = model.fit(X_train, y_train, 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
-		verbose=VERBOSE, validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack])
+		verbose=VERBOSE, validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,esCallBack,reduce_lr])
 
 score = model.evaluate(X_test, y_test, verbose=VERBOSE)
 print("\nTest score:", score[0])
