@@ -1,4 +1,5 @@
 # import the necessary packages
+import tensorflow as tf
 from keras import backend as K
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D
@@ -18,6 +19,9 @@ from keras.callbacks import EarlyStopping
 from keras.callbacks import ReduceLROnPlateau
 np.random.seed(1671)  # for reproducibility
 
+sess = tf.Session()
+K.set_session(sess)
+
 #define the convnet 
 class LeNet:
 	@staticmethod
@@ -35,10 +39,10 @@ class LeNet:
 		model.add(Dropout(0.1))
 		# Flatten => RELU layers
 		model.add(Flatten())
-		model.add(Dense(500))
+		model.add(Dense(400))
 		model.add(Activation("relu"))
 		model.add(Dropout(0.5))
-		model.add(Dense(200))
+		model.add(Dense(150))
 		model.add(Activation("relu"))
 		model.add(Dropout(0.8))
 		# a softmax classifier
@@ -75,14 +79,14 @@ print('---------------------------')
 print(total_inputs)
 
 #X_train, y_train , X_test, y_test
-X_train, X_test, y_train , y_test = train_test_split(total_inputs, total_output, test_size=0.2, random_state=42)
+X_train, X_test, y_train , y_test = train_test_split(total_inputs, total_output, test_size=0.15, random_state=42)
 
 #-------------- End Load Data -----------
 
 
-NB_EPOCH = 60
+NB_EPOCH = 6
 # network and training
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 VERBOSE = 1
 OPTIMIZER = Adam()
 VALIDATION_SPLIT=0.2
@@ -119,13 +123,29 @@ model = LeNet.build(input_shape=INPUT_SHAPE, classes=NB_CLASSES)
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
 	metrics=["accuracy"])
 
+
+# Prepare saver.
+builder = tf.saved_model.builder.SavedModelBuilder("./model_keras")
+
+# Initialize all variables
+sess.run(tf.global_variables_initializer())
+
+
 tbCallBack = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
-esCallBack = EarlyStopping(monitor='val_acc', min_delta=0, patience=5, verbose=0, mode='max')
+esCallBack = EarlyStopping(monitor='val_acc', min_delta=0, patience=12, verbose=0, mode='max')
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=0.001)
 
 history = model.fit(X_train, y_train, 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
-		verbose=VERBOSE, validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,esCallBack,reduce_lr])
+		verbose=VERBOSE, validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr,esCallBack])
+
+# Save model so we can use it in java.
+builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.SERVING])
+builder.save(True)
+
+writer = tf.summary.FileWriter('./keras_board/1')
+writer.add_graph(sess.graph)
+
 
 score = model.evaluate(X_test, y_test, verbose=VERBOSE)
 print("\nTest score:", score[0])
@@ -149,3 +169,14 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
+
+sample_1 = np.array( [[[0.37671986791414125,0.28395908337619136,-0.0966095873607713,-1.0,0.06891621389763203,-0.09716678086712205,0.726029084013637],
+					[4.984689881073479E-4,-0.30296253267499107,-0.16192917054985334,0.04820256230479658,0.4951319883569152,0.5269983894210499,-0.2560313828048315],
+					[-0.3710980821053321,-0.4845867212612598,-0.8647234314469595,-0.6491591208322198,-1.0,-0.5004549422844073,-0.9880910165770813],
+					[0.5540293108747256,0.5625990251930839,0.7420121698556554,0.5445551415657979,0.4644276850235627,0.7316976292340245,0.636690006814346],
+					[0.16486621649984112,-0.0466018967678159,0.5261100063227044,0.6256168612312738,-0.544295484930702,0.379125782517193,0.6959368575211544]]], dtype=float)
+sample_1 = sample_1[:, np.newaxis, :, :]
+
+out = model.predict(sample_1, batch_size=1, verbose=1)
+
+print(out)
