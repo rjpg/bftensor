@@ -28,15 +28,19 @@ class LeNet:
 	def build(input_shape, classes):
 		model = Sequential()
 		# CONV => RELU => POOL
-		model.add(Conv2D(20, kernel_size=5, padding="same",
+		# kernel size (width, height) default (2,5)
+		model.add(Conv2D(20, kernel_size=(3,3), padding="same",
 			input_shape=input_shape))
 		model.add(Activation("relu"))
+		# pool size - down scale int factor (vertical, horizontal)
 		model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1)))
 		# CONV => RELU => POOL
-		model.add(Conv2D(50, kernel_size=3, padding="same"))
+		
+		model.add(Conv2D(50, kernel_size=(3,3), padding="same"))
 		model.add(Activation("relu"))
 		model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1)))
-		model.add(Dropout(0.1))
+		
+		model.add(Dropout(0.40))
 		# Flatten => RELU layers
 		model.add(Flatten())
 		model.add(Dense(400))
@@ -48,11 +52,18 @@ class LeNet:
 		# a softmax classifier
 		model.add(Dense(classes))
 		model.add(Activation("softmax"))
-		#model.add(Dropout(0.3))
+		#model.add(Dropout(0.3)) # not logical to do droput on last layer with softmax 
 		return model
 
 #------------- load Data ----------------
-df = pd.read_csv('../NNNormalizeData-out.csv',header=None)
+
+# special cross validation file 1 NNNormalizeData-out-set-0.csv
+df = pd.read_csv('../NNNormalizeData-out-set-1.csv',header=None)
+#df = pd.read_csv('../NNNormalizeData-out.csv',header=None)
+
+#np.random.seed(42) # always shuffle the same way 
+#df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
+#df.reset_index(inplace=True, drop=True)
 
 print(df)
 
@@ -78,13 +89,16 @@ total_inputs = np.reshape(total_inputs, (-1,5,7))
 print('---------------------------')
 print(total_inputs)
 
+X_train=total_inputs
+y_train=total_output
+
 #X_train, y_train , X_test, y_test
-X_train, X_test, y_train , y_test = train_test_split(total_inputs, total_output, test_size=0.15, random_state=42)
+#X_train, X_test, y_train , y_test = train_test_split(total_inputs, total_output, test_size=0.15, random_state=42)
 
 #-------------- End Load Data -----------
 
 
-NB_EPOCH = 6
+NB_EPOCH = 200
 # network and training
 BATCH_SIZE = 64
 VERBOSE = 1
@@ -95,9 +109,6 @@ IMG_ROWS, IMG_COLS = 5, 7 # input image dimensions
 NB_CLASSES = 5  # number of outputs = number of digits
 INPUT_SHAPE = (1, IMG_ROWS, IMG_COLS)
 
-# data: shuffled and split between train and test sets
-
-######(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
 K.set_image_dim_ordering("th")
 
@@ -109,14 +120,14 @@ K.set_image_dim_ordering("th")
 
 # we need a 60K x [1 x 28 x 28] shape as input to the CONVNET
 X_train = X_train[:, np.newaxis, :, :]
-X_test = X_test[:, np.newaxis, :, :]
+#X_test = X_test[:, np.newaxis, :, :]
 
 print(X_train.shape[0], 'train samples')
-print(X_test.shape[0], 'test samples')
+#print(X_test.shape[0], 'test samples')
 
 # convert class vectors to binary class matrices
 y_train = np_utils.to_categorical(y_train, NB_CLASSES)
-y_test = np_utils.to_categorical(y_test, NB_CLASSES)
+#y_test = np_utils.to_categorical(y_test, NB_CLASSES)
 
 # initialize the optimizer and model
 model = LeNet.build(input_shape=INPUT_SHAPE, classes=NB_CLASSES)
@@ -137,14 +148,44 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=
 
 history = model.fit(X_train, y_train, 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
-		verbose=VERBOSE, validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr,esCallBack])
+		verbose=2, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
+		validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr,esCallBack])
 
 # Save model so we can use it in java.
 builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.SERVING])
 builder.save(True)
 
-writer = tf.summary.FileWriter('./keras_board/1')
-writer.add_graph(sess.graph)
+#writer = tf.summary.FileWriter('./keras_board/1')
+#writer.add_graph(sess.graph)
+
+
+######################## LOAD TEST DATA ###################################
+df_test = pd.read_csv('../NNNormalizeData-out-test.csv',header=None)
+
+np.random.seed(42) # always shuffle the same way 
+df_test = df_test.reindex(np.random.permutation(df_test.index)) # shuffle examples 
+df_test.reset_index(inplace=True, drop=True)
+
+inputs_test = []
+target_test = []
+
+y=0;    
+for x in df_test.columns:
+    if y != 35 :
+        #print("added %d" %y)
+        inputs_test.append(x)
+    else :
+        target_test.append(x)
+    y+=1
+
+
+
+X_test, y_test = df_test.as_matrix(inputs_test).astype(np.float32),df_test.as_matrix([target_test]).astype(np.int32)
+
+X_test = np.reshape(X_test, (-1,5,7))
+
+X_test = X_test[:, np.newaxis, :, :]
+y_test = np_utils.to_categorical(y_test, NB_CLASSES)
 
 
 score = model.evaluate(X_test, y_test, verbose=VERBOSE)
@@ -176,7 +217,12 @@ sample_1 = np.array( [[[0.37671986791414125,0.28395908337619136,-0.0966095873607
 					[0.5540293108747256,0.5625990251930839,0.7420121698556554,0.5445551415657979,0.4644276850235627,0.7316976292340245,0.636690006814346],
 					[0.16486621649984112,-0.0466018967678159,0.5261100063227044,0.6256168612312738,-0.544295484930702,0.379125782517193,0.6959368575211544]]], dtype=float)
 sample_1 = sample_1[:, np.newaxis, :, :]
+print(sample_1)
+out = model.predict_proba(sample_1, batch_size=1, verbose=1)
+print(out)
 
 out = model.predict(sample_1, batch_size=1, verbose=1)
+print(out)
 
+out = model.predict_classes(sample_1, batch_size=1, verbose=1)
 print(out)
