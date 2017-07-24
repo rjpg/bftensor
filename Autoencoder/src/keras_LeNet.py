@@ -98,6 +98,7 @@ y_train=total_output
 #-------------- End Load Data -----------
 
 
+
 NB_EPOCH = 200
 # network and training
 BATCH_SIZE = 64
