@@ -29,7 +29,7 @@ class LeNet:
 		model = Sequential()
 		# CONV => RELU => POOL
 		# kernel size (width, height) default (2,5)
-		model.add(Conv2D(20, kernel_size=(3,3), padding="same",
+		model.add(Conv2D(20, kernel_size=(2,5), padding="same",
 			input_shape=input_shape))
 		model.add(Activation("relu"))
 		# pool size - down scale int factor (vertical, horizontal)
@@ -38,7 +38,7 @@ class LeNet:
 		
 		model.add(Conv2D(50, kernel_size=(3,3), padding="same"))
 		model.add(Activation("relu"))
-		model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1)))
+		model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1))) #1,2
 		
 		model.add(Dropout(0.40))
 		# Flatten => RELU layers
@@ -58,8 +58,9 @@ class LeNet:
 #------------- load Data ----------------
 
 # special cross validation file 1 NNNormalizeData-out-set-0.csv
-df = pd.read_csv('../NNNormalizeData-out-set-1.csv',header=None)
+#df = pd.read_csv('../NNNormalizeData-out-set-1.csv',header=None)
 #df = pd.read_csv('../NNNormalizeData-out.csv',header=None)
+df = pd.read_csv('../NNNormalizeData-out.csv',header=None)  # 3 classes : up neutral down
 
 #np.random.seed(42) # always shuffle the same way 
 #df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
@@ -107,7 +108,7 @@ OPTIMIZER = Adam()
 VALIDATION_SPLIT=0.2
 
 IMG_ROWS, IMG_COLS = 5, 7 # input image dimensions
-NB_CLASSES = 5  # number of outputs = number of digits
+NB_CLASSES = 5  # number of outputs = number of classes
 INPUT_SHAPE = (1, IMG_ROWS, IMG_COLS)
 
 
@@ -116,8 +117,11 @@ K.set_image_dim_ordering("th")
 # consider them as float and normalize
 #X_train = X_train.astype('float32')
 #X_test = X_test.astype('float32')
-#X_train /= 255 
-#X_test /= 255  
+print("-------------- [0 , 1] ----------------------")
+X_train += 1 
+X_train /= 2
+print(X_train)
+#X_test += 1  
 
 # we need a 60K x [1 x 28 x 28] shape as input to the CONVNET
 X_train = X_train[:, np.newaxis, :, :]
@@ -150,7 +154,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=
 history = model.fit(X_train, y_train, 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
 		verbose=2, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
-		validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr,esCallBack])
+		validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr])#,esCallBack])
 
 # Save model so we can use it in java.
 builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.SERVING])
