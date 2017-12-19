@@ -37,7 +37,7 @@ x = Dense(height * width, activation='relu')(input_img)
 encoded = Dense(height * width//2, activation='relu')(x)
 encoded = Dense(height * width//8, activation='relu')(encoded)
 
-y = Dense(height * width//256, activation='relu')(x)
+y = Dense(height * width//256, activation='relu')(encoded)
 
 decoded = Dense(height * width//8, activation='relu')(y)
 decoded = Dense(height * width//2, activation='relu')(decoded)
