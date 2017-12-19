@@ -69,7 +69,7 @@ class LeNet:
 # special cross validation file 1 NNNormalizeData-out-set-0.csv
 #df = pd.read_csv('../NNNormalizeData-out-set-1.csv',header=None)
 #df = pd.read_csv('../NNNormalizeData-out.csv',header=None)
-df = pd.read_csv('../NNNormalizeData-out-2.csv',header=None)  # 3 classes : up neutral down
+df = pd.read_csv('../NNNormalizeData-out.csv',header=None)  # 3 classes : up neutral down
 
 #np.random.seed(42) # always shuffle the same way 
 #df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
@@ -94,19 +94,28 @@ print(inputs)
 
 total_inputs,total_output = df.as_matrix(inputs).astype(np.float32),df.as_matrix([target]).astype(np.int32)
 print('###########################')
-print(total_inputs)
+#print(total_inputs)
 print(total_inputs.shape)
 
 total_inputs = np.reshape(total_inputs, (-1,5,7))
-total= []
-total.append(total_inputs[0].T)
-total.append(total_inputs[1].T)
+print(total_inputs.shape)
+print (type(total_inputs))
+print(total_inputs[0])
+#total= np.array([][][])
+#total.append(total_inputs[0].T)
+#total.append(total_inputs[1].T)
 total=np.array([total_inputs[0].T])
-total=np.row_stack((total, [total_inputs[1].T]))
+for i in total_inputs:
+	total=np.row_stack((total, [i.T]))
+total=np.delete(total, 0, 0)
+#total=np.row_stack((total, [total_inputs[2].T]))
 #np.concatenate(total, total_inputs[1].T)
+print(total.shape)
 print (type(total))
+print (total[0])
+
 #total_inputs[0]=total_inputs[0].T
-print(total)
+#print(total)
 print('---------------------------')
 print(total_inputs)
 print(total_inputs.shape)
@@ -131,7 +140,7 @@ OPTIMIZER = Adam()
 VALIDATION_SPLIT=0.2
 
 IMG_ROWS, IMG_COLS = 5, 7 # input image dimensions
-NB_CLASSES = 3  # number of outputs = number of classes
+NB_CLASSES = 5  # number of outputs = number of classes
 INPUT_SHAPE = (1, IMG_ROWS, IMG_COLS)
 
 
