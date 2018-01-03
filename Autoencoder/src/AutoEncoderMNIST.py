@@ -10,6 +10,7 @@ from keras.models import Model
 from keras.layers import Input, Dense 
 from keras.utils import np_utils 
 import numpy as np
+from tensorflow.python.ops.variables import trainable_variables
 
 num_train = 60000
 num_test = 10000
@@ -34,41 +35,62 @@ input_img = Input(shape=(height * width,))
 
 x = Dense(height * width, activation='relu')(input_img)
 
-encoded = Dense(height * width//2, activation='relu')(x)
-encoded = Dense(height * width//8, activation='relu')(encoded)
+encoded1 = Dense(height * width//2, activation='relu')(x)
+encoded2 = Dense(height * width//8, activation='relu')(encoded1)
 
-y = Dense(height * width//256, activation='relu')(encoded)
+y = Dense(height * width//256, activation='relu')(encoded2)
 
-decoded = Dense(height * width//8, activation='relu')(y)
-decoded = Dense(height * width//2, activation='relu')(decoded)
+decoded2 = Dense(height * width//8, activation='relu')(y)
+decoded1 = Dense(height * width//2, activation='relu')(decoded2)
 
-z = Dense(height * width, activation='sigmoid')(decoded)
-model = Model(input_img, z)
+z = Dense(height * width, activation='sigmoid')(decoded1)
+autoencoder = Model(input_img, z)
 
-model.compile(optimizer='adadelta', loss='mse') # reporting the accuracy
+#encoder is the model of the autoencoder slice in the midel 
+encoder = Model(input_img, y)
 
-model.fit(X_train, X_train,
-      epochs=10,
+autoencoder.compile(optimizer='adadelta', loss='mse') # reporting the loss
+
+autoencoder.fit(X_train, X_train,
+      epochs=3,
       batch_size=128,
       shuffle=True,
       validation_data=(X_test, X_test))
 
-mid = Model(input_img, y)
-reduced_representation =mid.predict(X_test)
+# if you want an encoded flatten representation of every test MNIST
+reduced_representation =encoder.predict(X_test)
 
-out = Dense(num_classes, activation='softmax')(y)
-reduced = Model(input_img, out)
-reduced.compile(loss='categorical_crossentropy',
+#print encoded1 weights
+#weights = autoencoder.layers[1].get_weights() # list of numpy arrays
+#print(weights)
+
+# if you want to lock the weights of the encoder on post-training 
+#for layer in encoder.layers : layer.trainable = False
+
+
+# define new model encoder->Dense  10 neurons with soft max for classification 
+out2 = Dense(num_classes, activation='softmax')(encoder.output)
+newmodel = Model(encoder.input,out2)
+
+
+newmodel.compile(loss='categorical_crossentropy',
           optimizer='adam', 
           metrics=['accuracy']) 
 
-reduced.fit(X_train, Y_train,
+
+
+newmodel.fit(X_train, Y_train,
       epochs=10,
       batch_size=128,
       shuffle=True,
       validation_data=(X_test, Y_test))
 
-scores = reduced.evaluate(X_test, Y_test, verbose=1) 
+#print encoded1 weights again 
+#weights = newmodel.layers[1].get_weights() # list of numpy arrays
+#print(weights)
+
+
+scores = newmodel.evaluate(X_test, Y_test, verbose=1) 
 print("Accuracy: ", scores[1])
  
  
