@@ -1,6 +1,6 @@
 # import the necessary packages
 import tensorflow as tf
-import pydot
+#import pydot
 from keras import backend as K
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, AveragePooling2D
 from keras.layers.core import Activation, Lambda, Dropout 
@@ -59,16 +59,16 @@ class RJPGNet:
     @staticmethod
     def build(timeSteps,variables,classes,nlstms):
         #CONV=>POOL
-        inputNet = Input(shape=(1,timeSteps,variables),batch_shape=(20,1, 7, 5)) 
+        inputNet = Input(shape=(1,timeSteps,variables))#,batch_shape=(20,1, 7, 5)) 
         conv1=Conv2D(20, (2,5), padding="same")(inputNet)
         conv1=Activation("relu")(conv1)
-        conv1=AveragePooling2D(pool_size=(1, 1), strides=(1, 1))(conv1)
+        conv1=AveragePooling2D(pool_size=(2, 1), strides=(1, 1))(conv1)
         conv2=Conv2D(nlstms,(3,3), padding="same")(conv1)
-        conv2=AveragePooling2D(pool_size=(1, 1), strides=(1, 1))(conv2)
+        conv2=AveragePooling2D(pool_size=(2, 1), strides=(1, 1))(conv2)
         conv2=Activation("relu")(conv2)
         channels=Dropout(0.40)(conv2)
         lstmsVec=[]
-        for x in range(0,nlstms):
+        for x in range(0,1):
             filterImg=Lambda(lambda element : element[:,x,:,:])(channels)
             lstm=Bidirectional(LSTM(50),merge_mode='concat')(filterImg)
             #lstm=LSTM(50,stateful=True)(filterImg) #batch_shape=(512, 7, 5)
@@ -166,7 +166,7 @@ y_train=total_output
 
 
 
-NB_EPOCH = 200
+NB_EPOCH = 500
 # network and training
 BATCH_SIZE = 20
 VERBOSE = 1
@@ -224,7 +224,7 @@ tbCallBack = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, 
 esCallBack = EarlyStopping(monitor='val_acc', min_delta=0, patience=12, verbose=0, mode='max')
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=0.001)
 
-history = model.fit(X_train, [y_train],#],y_train], 
+history = model.fit(X_train, y_train,#],y_train], 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
 		verbose=1, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
 		validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr])#,esCallBack])
@@ -233,6 +233,21 @@ history = model.fit(X_train, [y_train],#],y_train],
 builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.SERVING])
 builder.save(True)
 
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
 #writer = tf.summary.FileWriter('./keras_board/1')
 #writer.add_graph(sess.graph)
 

@@ -62,9 +62,9 @@ class LeNet:
 #df = pd.read_csv('../NNNormalizeData-out.csv',header=None)
 df = pd.read_csv('../NNNormalizeData-out.csv',header=None)  # 3 classes : up neutral down
 
-#np.random.seed(42) # always shuffle the same way 
-#df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
-#df.reset_index(inplace=True, drop=True)
+np.random.seed(42) # always shuffle the same way 
+df = df.reindex(np.random.permutation(df.index)) # shuffle examples 
+df.reset_index(inplace=True, drop=True)
 
 print(df)
 
@@ -154,7 +154,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=
 
 history = model.fit(X_train, y_train, 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
-		verbose=2, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
+		verbose=1, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
 		validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr])#,esCallBack])
 
 # Save model so we can use it in java.
