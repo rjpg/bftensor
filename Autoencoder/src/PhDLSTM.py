@@ -1,4 +1,9 @@
-# import the necessary packages
+'''
+Created on 14/02/2018
+
+@author: rjpg
+'''
+
 import tensorflow as tf
 import pydot
 from keras import backend as K
@@ -140,7 +145,7 @@ print(total_inputs[0])
 #total.append(total_inputs[1].T)
 total=np.array([total_inputs[0].T])
 for i in total_inputs:
-	total=np.row_stack((total, [i.T]))
+    total=np.row_stack((total, [i.T]))
 total=np.delete(total, 0, 0)
 #total=np.row_stack((total, [total_inputs[2].T]))
 #np.concatenate(total, total_inputs[1].T)
@@ -189,14 +194,6 @@ X_train /= 2
 print(X_train)
 #X_test += 1  
 
-# we need a 60K x [1 x 28 x 28] shape as input to the CONVNET
-
-############## comment this line to use LSTM uncomment to use CNN
-X_train = X_train[:, np.newaxis, :, :]
-
-
-#X_test = X_test[:, np.newaxis, :, :]
-
 print(X_train.shape[0], 'train samples')
 #print(X_test.shape[0], 'test samples')
 
@@ -205,12 +202,11 @@ y_train = np_utils.to_categorical(y_train, NB_CLASSES)
 #y_test = np_utils.to_categorical(y_test, NB_CLASSES)
 
 # initialize the optimizer and model
-model = RJPGNet.build(timeSteps=7,variables=5,classes=5,nlstms=1)
-#model = LSTMNet.build(timeSteps=7,variables=5,classes=5)
+model = LSTMNet.build(timeSteps=7,variables=5,classes=5)
 
 model.summary()
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
-	metrics=["accuracy"])
+    metrics=["accuracy"])
 
 
 # Prepare saver.
@@ -224,10 +220,10 @@ tbCallBack = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, 
 esCallBack = EarlyStopping(monitor='val_acc', min_delta=0, patience=12, verbose=0, mode='max')
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=0.001)
 
-history = model.fit(X_train, [y_train],#],y_train], 
-		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
-		verbose=1, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
-		validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr])#,esCallBack])
+history = model.fit(X_train, y_train, 
+        batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
+        verbose=1, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
+        validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr])#,esCallBack])
 
 # Save model so we can use it in java.
 builder.add_meta_graph_and_variables(sess, [tf.saved_model.tag_constants.SERVING])
@@ -290,10 +286,10 @@ plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 
 sample_1 = np.array( [[[0.37671986791414125,0.28395908337619136,-0.0966095873607713,-1.0,0.06891621389763203,-0.09716678086712205,0.726029084013637],
-					[4.984689881073479E-4,-0.30296253267499107,-0.16192917054985334,0.04820256230479658,0.4951319883569152,0.5269983894210499,-0.2560313828048315],
-					[-0.3710980821053321,-0.4845867212612598,-0.8647234314469595,-0.6491591208322198,-1.0,-0.5004549422844073,-0.9880910165770813],
-					[0.5540293108747256,0.5625990251930839,0.7420121698556554,0.5445551415657979,0.4644276850235627,0.7316976292340245,0.636690006814346],
-					[0.16486621649984112,-0.0466018967678159,0.5261100063227044,0.6256168612312738,-0.544295484930702,0.379125782517193,0.6959368575211544]]], dtype=float)
+                    [4.984689881073479E-4,-0.30296253267499107,-0.16192917054985334,0.04820256230479658,0.4951319883569152,0.5269983894210499,-0.2560313828048315],
+                    [-0.3710980821053321,-0.4845867212612598,-0.8647234314469595,-0.6491591208322198,-1.0,-0.5004549422844073,-0.9880910165770813],
+                    [0.5540293108747256,0.5625990251930839,0.7420121698556554,0.5445551415657979,0.4644276850235627,0.7316976292340245,0.636690006814346],
+                    [0.16486621649984112,-0.0466018967678159,0.5261100063227044,0.6256168612312738,-0.544295484930702,0.379125782517193,0.6959368575211544]]], dtype=float)
 sample_1 = sample_1[:, np.newaxis, :, :]
 print(sample_1)
 out = model.predict_proba(sample_1, batch_size=1, verbose=1)

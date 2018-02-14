@@ -39,7 +39,7 @@ class LeNet:
 		model.add(Conv2D(50, kernel_size=(3,3), padding="same"))
 		model.add(Activation("relu"))
 		model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1))) #1,2
-		
+		model.summary()
 		model.add(Dropout(0.40))
 		# Flatten => RELU layers
 		model.add(Flatten())
@@ -139,6 +139,7 @@ model = LeNet.build(input_shape=INPUT_SHAPE, classes=NB_CLASSES)
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
 	metrics=["accuracy"])
 
+model.summary()
 
 # Prepare saver.
 builder = tf.saved_model.builder.SavedModelBuilder("./model_keras")
