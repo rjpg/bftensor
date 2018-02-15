@@ -43,6 +43,7 @@ class RJPGNet:
         #merged = merge(lstmsVec, mode='concat',concat_axis=1)
         #denselayers=Dense(400)(merged)
         
+        
         denselayers=Dense(400)(lstm)
         denselayers=Activation("relu")(denselayers)
         denselayers=Dropout(0.5)(denselayers)
