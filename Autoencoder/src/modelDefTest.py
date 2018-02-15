@@ -44,6 +44,7 @@ class RJPGNet:
         #denselayers=Dense(400)(merged)
         
         
+        
         denselayers=Dense(400)(lstm)
         denselayers=Activation("relu")(denselayers)
         denselayers=Dropout(0.5)(denselayers)
