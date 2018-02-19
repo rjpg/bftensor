@@ -9,10 +9,12 @@ from keras.models import Model
 from keras import backend as K
 from keras.layers.pooling import AveragePooling2D
 from numpy import vstack, hstack
+from keras.legacy.layers import merge
+from keras.layers.core import Lambda
 
-#K.set_image_dim_ordering("th")
+K.set_image_dim_ordering("th")
 
-input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
+input_img = Input(shape=(1, 28, 28))  # adapt this if using `channels_first` image data format
 
 x = Conv2D(10, (3, 3), activation='relu', padding='same')(input_img)
 #x = MaxPooling2D((2, 2), padding='same')(x)
@@ -20,6 +22,12 @@ x = Conv2D(10, (3, 3), activation='relu', padding='same')(input_img)
 #x = MaxPooling2D((2, 2), padding='same')(x)
 #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
 encoded = AveragePooling2D((1, 2), padding='same')(x)
+
+lstmsVec=[]
+for x in range(0,10):
+    filterImg=Lambda(lambda element : element[:,x,:,:])(encoded)
+    lstmsVec.append(filterImg)
+merged = merge(lstmsVec, mode='concat',concat_axis=2)
 
 # at this point the representation is (4, 4, 8) i.e. 128-dimensional
 
@@ -32,6 +40,8 @@ x = UpSampling2D((1, 2))(x)
 decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
 
 encoder = Model(input_img, encoded)
+
+encoderHstack= Model(input_img,merged)
 
 autoencoder = Model(input_img, decoded)
 autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
@@ -48,18 +58,18 @@ import numpy as np
 
 x_train = x_train.astype('float32') / 255.
 x_test = x_test.astype('float32') / 255.
-x_train = np.reshape(x_train, (len(x_train), 28, 28, 1))  # adapt this if using `channels_first` image data format
-x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))  # adapt this if using `channels_first` image data format
+x_train = np.reshape(x_train, (len(x_train), 1, 28, 28))  # adapt this if using `channels_first` image data format
+x_test = np.reshape(x_test, (len(x_test), 1, 28, 28))  # adapt this if using `channels_first` image data format
 
 
 from keras.callbacks import TensorBoard
 
-autoencoder.fit(x_train, x_train,
-                epochs=1,
-                batch_size=128,
-                shuffle=True,
-                validation_data=(x_test, x_test),
-                callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+#autoencoder.fit(x_train, x_train,
+#                epochs=1,
+#                batch_size=128,
+#                shuffle=True,
+#                validation_data=(x_test, x_test),
+#                callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 
 decoded_imgs = autoencoder.predict(x_test)
 
@@ -82,6 +92,9 @@ import matplotlib.pyplot as plt
 #    ax.get_yaxis().set_visible(False)
 #plt.show()
 
+
+
+
 encoded_imgs = encoder.predict(x_test)
 
 
@@ -101,11 +114,11 @@ encoded_imgs = encoder.predict(x_test)
 #print (array)
 images = encoded_imgs[0,:,:,:]
 
-print(images[1,1,:].size)
+print(images[:,1,1].size)
 
-image=images[:,:,0]
+image=images[0,:,:]
 for i in range(1,10):
-    image=hstack((image,images[:,:,i]))
+    image=hstack((image,images[i,:,:]))
 
 
 plt.figure(figsize=(10, 10))
@@ -115,6 +128,22 @@ plt.imshow(image)
 ax.get_xaxis().set_visible(False)
 ax.get_yaxis().set_visible(False)
 plt.show()
+
+
+print("showing encoded Hstack with merge filters")
+encoded_imgsHstak = encoderHstack.predict(x_test)
+print("showing encoded Hstack with merge filters")
+images = encoded_imgsHstak[0,:,:]
+
+plt.figure(figsize=(10, 10))
+ax = plt.subplot(1, 1, 1)
+plt.imshow(image)
+#plt.gray()
+ax.get_xaxis().set_visible(False)
+ax.get_yaxis().set_visible(False)
+plt.show()
+
+
 
 n = 10
 plt.figure(figsize=(40, 5))
@@ -130,7 +159,7 @@ for i in range(n):
 
     ax = plt.subplot(2, 10, (i+1)) #+ n
     #plt.imshow(encoded_imgs[0,:,:,i])#.reshape(14, 14))
-    plt.imshow(encoded_imgs[0,:,:,i])
+    plt.imshow(encoded_imgs[0,i,:,:])
 #    plt.gray()
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
@@ -158,7 +187,7 @@ for i in range(n):
 
 
     ax = plt.subplot(2, 10, (i+1) + n)
-    plt.imshow(encoded_imgs[1,:,:,i])#.reshape(14, 14))
+    plt.imshow(encoded_imgs[1,i,:,:])#.reshape(14, 14))
     plt.gray()
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
