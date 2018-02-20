@@ -71,6 +71,7 @@ autoencoder.fit(x_train, x_train,
                 validation_data=(x_test, x_test),
                 callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
 
+# do not train encoding 
 for layer in encoderHstack.layers : layer.trainable = False
 
 decoded_imgs = autoencoder.predict(x_test)
