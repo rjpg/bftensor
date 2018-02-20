@@ -53,6 +53,9 @@ class LSTMNet:
         model=Model(inputNet,classificationLayer)
         return model
 
+def independentFilters(element,filterIndex):
+    print(element.shape)
+    return element[:,filterIndex,:,:]
 
 #define the convnet multi LSTMs
 class RJPGNet:
@@ -68,8 +71,8 @@ class RJPGNet:
         conv2=Activation("relu")(conv2)
         channels=Dropout(0.40)(conv2)
         lstmsVec=[]
-        for x in range(0,1):
-            filterImg=Lambda(lambda element : element[:,x,:,:])(channels)
+        for x in range(0,nlstms):
+            filterImg=Lambda(lambda element : independentFilters(element=element,filterIndex=x))(channels)
             lstm=Bidirectional(LSTM(50),merge_mode='concat')(filterImg)
             #lstm=LSTM(50,stateful=True)(filterImg) #batch_shape=(512, 7, 5)
             #denselayers=Dense(400)(lstm)
@@ -197,7 +200,7 @@ X_train = X_train[:, np.newaxis, :, :]
 
 #X_test = X_test[:, np.newaxis, :, :]
 
-print(X_train.shape[0], 'train samples')
+print(X_train.shape, 'train samples')
 #print(X_test.shape[0], 'test samples')
 
 # convert class vectors to binary class matrices
@@ -205,13 +208,14 @@ y_train = np_utils.to_categorical(y_train, NB_CLASSES)
 #y_test = np_utils.to_categorical(y_test, NB_CLASSES)
 
 # initialize the optimizer and model
-model = RJPGNet.build(timeSteps=7,variables=5,classes=5,nlstms=1)
+model = RJPGNet.build(timeSteps=7,variables=5,classes=5,nlstms=3)
 #model = LSTMNet.build(timeSteps=7,variables=5,classes=5)
 
 model.summary()
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
 	metrics=["accuracy"])
 
+plot_model(model, to_file="model2.png",show_shapes=True)
 
 # Prepare saver.
 builder = tf.saved_model.builder.SavedModelBuilder("./model_keras")

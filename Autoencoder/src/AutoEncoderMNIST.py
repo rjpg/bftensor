@@ -46,7 +46,7 @@ decoded1 = Dense(height * width//2, activation='relu')(decoded2)
 z = Dense(height * width, activation='sigmoid')(decoded1)
 autoencoder = Model(input_img, z)
 
-#encoder is the model of the autoencoder slice in the midel 
+#encoder is the model of the autoencoder slice in the middle 
 encoder = Model(input_img, y)
 
 autoencoder.compile(optimizer='adadelta', loss='mse') # reporting the loss

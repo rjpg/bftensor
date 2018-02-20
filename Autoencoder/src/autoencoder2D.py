@@ -16,27 +16,26 @@ K.set_image_dim_ordering("th")
 
 input_img = Input(shape=(1, 28, 28))  # adapt this if using `channels_first` image data format
 
-x = Conv2D(10, (3, 3), activation='relu', padding='same')(input_img)
+x = Conv2D(5, (3, 3), activation='relu', padding='same')(input_img)
 #x = MaxPooling2D((2, 2), padding='same')(x)
 #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
 #x = MaxPooling2D((2, 2), padding='same')(x)
 #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
-encoded = AveragePooling2D((1, 2), padding='same')(x)
-
+encoded = AveragePooling2D(pool_size=(2, 1), strides=(2, 1), padding='valid')(x)
 lstmsVec=[]
-for x in range(0,10):
+for x in range(0,5):
     filterImg=Lambda(lambda element : element[:,x,:,:])(encoded)
     lstmsVec.append(filterImg)
 merged = merge(lstmsVec, mode='concat',concat_axis=2)
 
 # at this point the representation is (4, 4, 8) i.e. 128-dimensional
 
-x = Conv2D(10, (3, 3), activation='relu', padding='same')(encoded)
+x = Conv2D(5, (3, 3), activation='relu', padding='same')(encoded)
 #x = UpSampling2D((2, 2))(x)
 #x = Conv2D(8, (3, 3), activation='relu', padding='same')(x)
 #x = UpSampling2D((2, 2))(x)
 #x = Conv2D(16, (3, 3), activation='relu')(x)
-x = UpSampling2D((1, 2))(x)
+x = UpSampling2D((2, 1))(x)
 decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
 
 encoder = Model(input_img, encoded)
@@ -44,6 +43,7 @@ encoder = Model(input_img, encoded)
 encoderHstack= Model(input_img,merged)
 
 autoencoder = Model(input_img, decoded)
+
 autoencoder.compile(optimizer='adadelta', loss='binary_crossentropy')
 
 autoencoder.summary()
@@ -64,12 +64,14 @@ x_test = np.reshape(x_test, (len(x_test), 1, 28, 28))  # adapt this if using `ch
 
 from keras.callbacks import TensorBoard
 
-#autoencoder.fit(x_train, x_train,
-#                epochs=1,
-#                batch_size=128,
-#                shuffle=True,
-#                validation_data=(x_test, x_test),
-#                callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+autoencoder.fit(x_train, x_train,
+                epochs=1,
+                batch_size=128,
+                shuffle=True,
+                validation_data=(x_test, x_test),
+                callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+
+for layer in encoderHstack.layers : layer.trainable = False
 
 decoded_imgs = autoencoder.predict(x_test)
 
@@ -117,7 +119,7 @@ images = encoded_imgs[0,:,:,:]
 print(images[:,1,1].size)
 
 image=images[0,:,:]
-for i in range(1,10):
+for i in range(1,5):
     image=hstack((image,images[i,:,:]))
 
 
@@ -145,7 +147,7 @@ plt.show()
 
 
 
-n = 10
+n = 5
 plt.figure(figsize=(40, 5))
 
 for i in range(n):
@@ -173,7 +175,7 @@ for i in range(n):
     
 plt.show()
 
-n = 10
+n = 5
 plt.figure(figsize=(40, 5))
 
 
