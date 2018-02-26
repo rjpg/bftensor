@@ -75,12 +75,12 @@ classifier = learn.DNNClassifier(hidden_units=[10, 20, 5], n_classes=5
 
 
 tf.logging.set_verbosity(tf.logging.INFO) # ts logging to normal 
-logging.getLogger().setLevel(logging.INFO) # print train evolution
-classifier.fit(train_inputs, train_output, steps=100)
+#logging.getLogger().setLevel(logging.INFO) # print train evolution
+history= classifier.fit(train_inputs, train_output, steps=100)
 #back to tf output only errors 
 tf.logging.set_verbosity(tf.logging.ERROR)
 
-
+print(history)
 
 # Measure accuracy
 pred = list(classifier.predict(test_inputs, as_iterable=True))

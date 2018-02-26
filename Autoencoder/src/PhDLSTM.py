@@ -5,7 +5,6 @@ Created on 14/02/2018
 '''
 
 import tensorflow as tf
-import pydot
 from keras import backend as K
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, AveragePooling2D
 from keras.layers.core import Activation, Lambda, Dropout 
@@ -42,7 +41,7 @@ class LSTMNet:
     @staticmethod
     def build(timeSteps,variables,classes):
         #CONV=>POOL
-        inputNet = Input(shape=(timeSteps,variables),batch_shape=(20, 7, 5)) 
+        inputNet = Input(shape=(timeSteps,variables)) #batch_shape=(20, 7, 5) 
         #lstm=Bidirectional(LSTM(100,recurrent_dropout=0.4,dropout=0.4),merge_mode='concat')(inputNet) #worse using stateful=True
         lstm=Bidirectional(LSTM(50),merge_mode='concat')(inputNet) #worse using stateful=True 
         #denselayers=Dense(400)(lstm)

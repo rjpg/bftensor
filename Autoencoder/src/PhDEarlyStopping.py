@@ -109,7 +109,8 @@ classifier.fit(train_inputs, train_output, steps=training_steps ,
                batch_size=batch_size,
                monitors=[validation_monitor])
 print("Fit is finish...")
- 
+
+
 #print (classifier.get_variable_names()) 
 
 #Save Model into saved_model.pbtxt file (possible to Load in Java)

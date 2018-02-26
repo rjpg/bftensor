@@ -1,5 +1,5 @@
 node {
-  name: "global_step/Initializer/zeros"
+  name: "global_step/Initializer/Const"
   op: "Const"
   attr {
     key: "_class"
@@ -86,7 +86,7 @@ node {
   name: "global_step/Assign"
   op: "Assign"
   input: "global_step"
-  input: "global_step/Initializer/zeros"
+  input: "global_step/Initializer/Const"
   attr {
     key: "T"
     value {
@@ -179,12 +179,6 @@ node {
     key: "shape"
     value {
       shape {
-        dim {
-          size: -1
-        }
-        dim {
-          size: 35
-        }
       }
     }
   }
@@ -214,282 +208,6 @@ node {
     key: "shape"
     value {
       shape {
-        dim {
-          size: -1
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/IsVariableInitialized"
-  op: "IsVariableInitialized"
-  input: "global_step"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@global_step"
-      }
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT64
-    }
-  }
-}
-node {
-  name: "global_step/cond/Switch"
-  op: "Switch"
-  input: "global_step/IsVariableInitialized"
-  input: "global_step/IsVariableInitialized"
-  attr {
-    key: "T"
-    value {
-      type: DT_BOOL
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/cond/switch_t"
-  op: "Identity"
-  input: "global_step/cond/Switch:1"
-  attr {
-    key: "T"
-    value {
-      type: DT_BOOL
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/cond/switch_f"
-  op: "Identity"
-  input: "global_step/cond/Switch"
-  attr {
-    key: "T"
-    value {
-      type: DT_BOOL
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/cond/pred_id"
-  op: "Identity"
-  input: "global_step/IsVariableInitialized"
-  attr {
-    key: "T"
-    value {
-      type: DT_BOOL
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/cond/read"
-  op: "Identity"
-  input: "global_step/cond/read/Switch:1"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT64
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/cond/read/Switch"
-  op: "RefSwitch"
-  input: "global_step"
-  input: "global_step/cond/pred_id"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT64
-    }
-  }
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@global_step"
-      }
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/cond/Switch_1"
-  op: "Switch"
-  input: "global_step/Initializer/zeros"
-  input: "global_step/cond/pred_id"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT64
-    }
-  }
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@global_step"
-      }
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/cond/Merge"
-  op: "Merge"
-  input: "global_step/cond/Switch_1"
-  input: "global_step/cond/read"
-  attr {
-    key: "N"
-    value {
-      i: 2
-    }
-  }
-  attr {
-    key: "T"
-    value {
-      type: DT_INT64
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "global_step/add/y"
-  op: "Const"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT64
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT64
-        tensor_shape {
-        }
-        int64_val: 0
-      }
-    }
-  }
-}
-node {
-  name: "global_step/add"
-  op: "Add"
-  input: "global_step/cond/Merge"
-  input: "global_step/add/y"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT64
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
       }
     }
   }
@@ -961,7 +679,7 @@ node {
   }
 }
 node {
-  name: "dnn/hiddenlayer_0/biases/part_0/Initializer/zeros"
+  name: "dnn/hiddenlayer_0/biases/part_0/Initializer/Const"
   op: "Const"
   attr {
     key: "_class"
@@ -1060,7 +778,7 @@ node {
   name: "dnn/hiddenlayer_0/biases/part_0/Assign"
   op: "Assign"
   input: "dnn/hiddenlayer_0/biases/part_0"
-  input: "dnn/hiddenlayer_0/biases/part_0/Initializer/zeros"
+  input: "dnn/hiddenlayer_0/biases/part_0/Initializer/Const"
   attr {
     key: "T"
     value {
@@ -1949,7 +1667,7 @@ node {
   }
 }
 node {
-  name: "dnn/hiddenlayer_1/biases/part_0/Initializer/zeros"
+  name: "dnn/hiddenlayer_1/biases/part_0/Initializer/Const"
   op: "Const"
   attr {
     key: "_class"
@@ -2048,7 +1766,7 @@ node {
   name: "dnn/hiddenlayer_1/biases/part_0/Assign"
   op: "Assign"
   input: "dnn/hiddenlayer_1/biases/part_0"
-  input: "dnn/hiddenlayer_1/biases/part_0/Initializer/zeros"
+  input: "dnn/hiddenlayer_1/biases/part_0/Initializer/Const"
   attr {
     key: "T"
     value {
@@ -2937,7 +2655,7 @@ node {
   }
 }
 node {
-  name: "dnn/hiddenlayer_2/biases/part_0/Initializer/zeros"
+  name: "dnn/hiddenlayer_2/biases/part_0/Initializer/Const"
   op: "Const"
   attr {
     key: "_class"
@@ -3036,7 +2754,7 @@ node {
   name: "dnn/hiddenlayer_2/biases/part_0/Assign"
   op: "Assign"
   input: "dnn/hiddenlayer_2/biases/part_0"
-  input: "dnn/hiddenlayer_2/biases/part_0/Initializer/zeros"
+  input: "dnn/hiddenlayer_2/biases/part_0/Initializer/Const"
   attr {
     key: "T"
     value {
@@ -3925,7 +3643,7 @@ node {
   }
 }
 node {
-  name: "dnn/logits/biases/part_0/Initializer/zeros"
+  name: "dnn/logits/biases/part_0/Initializer/Const"
   op: "Const"
   attr {
     key: "_class"
@@ -4024,7 +3742,7 @@ node {
   name: "dnn/logits/biases/part_0/Assign"
   op: "Assign"
   input: "dnn/logits/biases/part_0"
-  input: "dnn/logits/biases/part_0/Initializer/zeros"
+  input: "dnn/logits/biases/part_0/Initializer/Const"
   attr {
     key: "T"
     value {
@@ -4535,12 +4253,6 @@ node {
       }
     }
   }
-  attr {
-    key: "output_type"
-    value {
-      type: DT_INT64
-    }
-  }
 }
 node {
   name: "dnn/multi_class_head/predictions/probabilities"
@@ -4705,27 +4417,7 @@ node {
   }
 }
 node {
-  name: "Identity"
-  op: "Identity"
-  input: "dnn/multi_class_head/softmax_cross_entropy_loss/loss"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-}
-node {
-  name: "loss/tags"
+  name: "dnn/multi_class_head/ScalarSummary/tags"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -4755,10 +4447,10 @@ node {
   }
 }
 node {
-  name: "loss"
+  name: "dnn/multi_class_head/ScalarSummary"
   op: "ScalarSummary"
-  input: "loss/tags"
-  input: "Identity"
+  input: "dnn/multi_class_head/ScalarSummary/tags"
+  input: "dnn/multi_class_head/softmax_cross_entropy_loss/loss"
   attr {
     key: "T"
     value {
@@ -5158,7 +4850,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/train_op/dnn/gradients/grad_ys_0"
+  name: "dnn/multi_class_head/train_op/dnn/gradients/Const"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -5191,7 +4883,7 @@ node {
   name: "dnn/multi_class_head/train_op/dnn/gradients/Fill"
   op: "Fill"
   input: "dnn/multi_class_head/train_op/dnn/gradients/Shape"
-  input: "dnn/multi_class_head/train_op/dnn/gradients/grad_ys_0"
+  input: "dnn/multi_class_head/train_op/dnn/gradients/Const"
   attr {
     key: "T"
     value {
@@ -8796,16 +8488,8 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/metrics/mean/total/Initializer/zeros"
+  name: "dnn/multi_class_head/metrics/mean/zeros"
   op: "Const"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/mean/total"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -8836,14 +8520,6 @@ node {
 node {
   name: "dnn/multi_class_head/metrics/mean/total"
   op: "VariableV2"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/mean/total"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -8883,7 +8559,7 @@ node {
   name: "dnn/multi_class_head/metrics/mean/total/Assign"
   op: "Assign"
   input: "dnn/multi_class_head/metrics/mean/total"
-  input: "dnn/multi_class_head/metrics/mean/total/Initializer/zeros"
+  input: "dnn/multi_class_head/metrics/mean/zeros"
   attr {
     key: "T"
     value {
@@ -8949,16 +8625,8 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/metrics/mean/count/Initializer/zeros"
+  name: "dnn/multi_class_head/metrics/mean/zeros_1"
   op: "Const"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/mean/count"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -8989,14 +8657,6 @@ node {
 node {
   name: "dnn/multi_class_head/metrics/mean/count"
   op: "VariableV2"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/mean/count"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -9036,7 +8696,7 @@ node {
   name: "dnn/multi_class_head/metrics/mean/count/Assign"
   op: "Assign"
   input: "dnn/multi_class_head/metrics/mean/count"
-  input: "dnn/multi_class_head/metrics/mean/count/Initializer/zeros"
+  input: "dnn/multi_class_head/metrics/mean/zeros_1"
   attr {
     key: "T"
     value {
@@ -9625,16 +9285,8 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/metrics/accuracy/total/Initializer/zeros"
+  name: "dnn/multi_class_head/metrics/accuracy/zeros"
   op: "Const"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/accuracy/total"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -9665,14 +9317,6 @@ node {
 node {
   name: "dnn/multi_class_head/metrics/accuracy/total"
   op: "VariableV2"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/accuracy/total"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -9712,7 +9356,7 @@ node {
   name: "dnn/multi_class_head/metrics/accuracy/total/Assign"
   op: "Assign"
   input: "dnn/multi_class_head/metrics/accuracy/total"
-  input: "dnn/multi_class_head/metrics/accuracy/total/Initializer/zeros"
+  input: "dnn/multi_class_head/metrics/accuracy/zeros"
   attr {
     key: "T"
     value {
@@ -9778,16 +9422,8 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/metrics/accuracy/count/Initializer/zeros"
+  name: "dnn/multi_class_head/metrics/accuracy/zeros_1"
   op: "Const"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/accuracy/count"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -9818,14 +9454,6 @@ node {
 node {
   name: "dnn/multi_class_head/metrics/accuracy/count"
   op: "VariableV2"
-  attr {
-    key: "_class"
-    value {
-      list {
-        s: "loc:@dnn/multi_class_head/metrics/accuracy/count"
-      }
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -9865,7 +9493,7 @@ node {
   name: "dnn/multi_class_head/metrics/accuracy/count/Assign"
   op: "Assign"
   input: "dnn/multi_class_head/metrics/accuracy/count"
-  input: "dnn/multi_class_head/metrics/accuracy/count/Initializer/zeros"
+  input: "dnn/multi_class_head/metrics/accuracy/zeros_1"
   attr {
     key: "T"
     value {
@@ -10371,7 +9999,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/Shape"
+  name: "dnn/multi_class_head/Shape_1"
   op: "Shape"
   input: "dnn/multi_class_head/predictions/probabilities"
   attr {
@@ -10400,7 +10028,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice/stack"
+  name: "dnn/multi_class_head/strided_slice_1/stack"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -10436,7 +10064,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice/stack_1"
+  name: "dnn/multi_class_head/strided_slice_1/stack_1"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -10472,7 +10100,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice/stack_2"
+  name: "dnn/multi_class_head/strided_slice_1/stack_2"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -10508,12 +10136,12 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice"
+  name: "dnn/multi_class_head/strided_slice_1"
   op: "StridedSlice"
-  input: "dnn/multi_class_head/_classification_output_alternatives/Shape"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice/stack"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice/stack_1"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice/stack_2"
+  input: "dnn/multi_class_head/Shape_1"
+  input: "dnn/multi_class_head/strided_slice_1/stack"
+  input: "dnn/multi_class_head/strided_slice_1/stack_1"
+  input: "dnn/multi_class_head/strided_slice_1/stack_2"
   attr {
     key: "Index"
     value {
@@ -10567,203 +10195,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/Shape_1"
-  op: "Shape"
-  input: "dnn/multi_class_head/predictions/probabilities"
-  attr {
-    key: "T"
-    value {
-      type: DT_FLOAT
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 2
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "out_type"
-    value {
-      type: DT_INT32
-    }
-  }
-}
-node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1/stack"
-  op: "Const"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1/stack_1"
-  op: "Const"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 2
-      }
-    }
-  }
-}
-node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1/stack_2"
-  op: "Const"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1"
-  op: "StridedSlice"
-  input: "dnn/multi_class_head/_classification_output_alternatives/Shape_1"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1/stack"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1/stack_1"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1/stack_2"
-  attr {
-    key: "Index"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-        }
-      }
-    }
-  }
-  attr {
-    key: "begin_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "ellipsis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "end_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "new_axis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "shrink_axis_mask"
-    value {
-      i: 1
-    }
-  }
-}
-node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/range/start"
+  name: "dnn/multi_class_head/range/start"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -10793,7 +10225,37 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/range/delta"
+  name: "dnn/multi_class_head/range/limit"
+  op: "Const"
+  attr {
+    key: "_output_shapes"
+    value {
+      list {
+        shape {
+        }
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "value"
+    value {
+      tensor {
+        dtype: DT_INT32
+        tensor_shape {
+        }
+        int_val: 5
+      }
+    }
+  }
+}
+node {
+  name: "dnn/multi_class_head/range/delta"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -10823,11 +10285,11 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/range"
+  name: "dnn/multi_class_head/range"
   op: "Range"
-  input: "dnn/multi_class_head/_classification_output_alternatives/range/start"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice_1"
-  input: "dnn/multi_class_head/_classification_output_alternatives/range/delta"
+  input: "dnn/multi_class_head/range/start"
+  input: "dnn/multi_class_head/range/limit"
+  input: "dnn/multi_class_head/range/delta"
   attr {
     key: "Tidx"
     value {
@@ -10840,7 +10302,7 @@ node {
       list {
         shape {
           dim {
-            size: -1
+            size: 5
           }
         }
       }
@@ -10848,7 +10310,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/ExpandDims/dim"
+  name: "dnn/multi_class_head/ExpandDims/dim"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -10878,10 +10340,10 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/ExpandDims"
+  name: "dnn/multi_class_head/ExpandDims"
   op: "ExpandDims"
-  input: "dnn/multi_class_head/_classification_output_alternatives/range"
-  input: "dnn/multi_class_head/_classification_output_alternatives/ExpandDims/dim"
+  input: "dnn/multi_class_head/range"
+  input: "dnn/multi_class_head/ExpandDims/dim"
   attr {
     key: "T"
     value {
@@ -10903,7 +10365,7 @@ node {
             size: 1
           }
           dim {
-            size: -1
+            size: 5
           }
         }
       }
@@ -10911,7 +10373,7 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/Tile/multiples/1"
+  name: "dnn/multi_class_head/Tile/multiples/1"
   op: "Const"
   attr {
     key: "_output_shapes"
@@ -10941,10 +10403,10 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/Tile/multiples"
+  name: "dnn/multi_class_head/Tile/multiples"
   op: "Pack"
-  input: "dnn/multi_class_head/_classification_output_alternatives/strided_slice"
-  input: "dnn/multi_class_head/_classification_output_alternatives/Tile/multiples/1"
+  input: "dnn/multi_class_head/strided_slice_1"
+  input: "dnn/multi_class_head/Tile/multiples/1"
   attr {
     key: "N"
     value {
@@ -10977,10 +10439,10 @@ node {
   }
 }
 node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/Tile"
+  name: "dnn/multi_class_head/Tile"
   op: "Tile"
-  input: "dnn/multi_class_head/_classification_output_alternatives/ExpandDims"
-  input: "dnn/multi_class_head/_classification_output_alternatives/Tile/multiples"
+  input: "dnn/multi_class_head/ExpandDims"
+  input: "dnn/multi_class_head/Tile/multiples"
   attr {
     key: "T"
     value {
@@ -11002,66 +10464,10 @@ node {
             size: -1
           }
           dim {
-            size: -1
+            size: 5
           }
         }
       }
-    }
-  }
-}
-node {
-  name: "dnn/multi_class_head/_classification_output_alternatives/classes_tensor"
-  op: "AsString"
-  input: "dnn/multi_class_head/_classification_output_alternatives/Tile"
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: -1
-          }
-          dim {
-            size: -1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "fill"
-    value {
-      s: ""
-    }
-  }
-  attr {
-    key: "precision"
-    value {
-      i: -1
-    }
-  }
-  attr {
-    key: "scientific"
-    value {
-      b: false
-    }
-  }
-  attr {
-    key: "shortest"
-    value {
-      b: false
-    }
-  }
-  attr {
-    key: "width"
-    value {
-      i: -1
     }
   }
 }
@@ -11738,7 +11144,6 @@ node {
   input: "report_uninitialized_variables/IsVariableInitialized_19"
   input: "report_uninitialized_variables/IsVariableInitialized_20"
   input: "report_uninitialized_variables/IsVariableInitialized_21"
-  device: "/device:CPU:0"
   attr {
     key: "N"
     value {
@@ -11774,7 +11179,6 @@ node {
   name: "report_uninitialized_variables/LogicalNot"
   op: "LogicalNot"
   input: "report_uninitialized_variables/stack"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -11791,7 +11195,6 @@ node {
 node {
   name: "report_uninitialized_variables/Const"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -11849,7 +11252,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/Shape"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -11886,7 +11288,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/strided_slice/stack"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -11923,7 +11324,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/strided_slice/stack_1"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -11960,7 +11360,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/strided_slice/stack_2"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12001,7 +11400,6 @@ node {
   input: "report_uninitialized_variables/boolean_mask/strided_slice/stack"
   input: "report_uninitialized_variables/boolean_mask/strided_slice/stack_1"
   input: "report_uninitialized_variables/boolean_mask/strided_slice/stack_2"
-  device: "/device:CPU:0"
   attr {
     key: "Index"
     value {
@@ -12029,7 +11427,7 @@ node {
   attr {
     key: "begin_mask"
     value {
-      i: 0
+      i: 1
     }
   }
   attr {
@@ -12060,7 +11458,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/Prod/reduction_indices"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12099,7 +11496,6 @@ node {
   op: "Prod"
   input: "report_uninitialized_variables/boolean_mask/strided_slice"
   input: "report_uninitialized_variables/boolean_mask/Prod/reduction_indices"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -12131,7 +11527,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/Shape_1"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12168,7 +11563,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/strided_slice_1/stack"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12197,7 +11591,7 @@ node {
             size: 1
           }
         }
-        int_val: 0
+        int_val: 1
       }
     }
   }
@@ -12205,7 +11599,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/strided_slice_1/stack_1"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12242,7 +11635,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/strided_slice_1/stack_2"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12283,217 +11675,6 @@ node {
   input: "report_uninitialized_variables/boolean_mask/strided_slice_1/stack"
   input: "report_uninitialized_variables/boolean_mask/strided_slice_1/stack_1"
   input: "report_uninitialized_variables/boolean_mask/strided_slice_1/stack_2"
-  device: "/device:CPU:0"
-  attr {
-    key: "Index"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "begin_mask"
-    value {
-      i: 1
-    }
-  }
-  attr {
-    key: "ellipsis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "end_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "new_axis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "shrink_axis_mask"
-    value {
-      i: 0
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables/boolean_mask/Shape_2"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 22
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables/boolean_mask/strided_slice_2/stack"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables/boolean_mask/strided_slice_2/stack_1"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 0
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables/boolean_mask/strided_slice_2/stack_2"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables/boolean_mask/strided_slice_2"
-  op: "StridedSlice"
-  input: "report_uninitialized_variables/boolean_mask/Shape_2"
-  input: "report_uninitialized_variables/boolean_mask/strided_slice_2/stack"
-  input: "report_uninitialized_variables/boolean_mask/strided_slice_2/stack_1"
-  input: "report_uninitialized_variables/boolean_mask/strided_slice_2/stack_2"
-  device: "/device:CPU:0"
   attr {
     key: "Index"
     value {
@@ -12549,10 +11730,9 @@ node {
   }
 }
 node {
-  name: "report_uninitialized_variables/boolean_mask/concat/values_1"
+  name: "report_uninitialized_variables/boolean_mask/concat/values_0"
   op: "Pack"
   input: "report_uninitialized_variables/boolean_mask/Prod"
-  device: "/device:CPU:0"
   attr {
     key: "N"
     value {
@@ -12587,7 +11767,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/concat/axis"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12618,15 +11797,13 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/concat"
   op: "ConcatV2"
+  input: "report_uninitialized_variables/boolean_mask/concat/values_0"
   input: "report_uninitialized_variables/boolean_mask/strided_slice_1"
-  input: "report_uninitialized_variables/boolean_mask/concat/values_1"
-  input: "report_uninitialized_variables/boolean_mask/strided_slice_2"
   input: "report_uninitialized_variables/boolean_mask/concat/axis"
-  device: "/device:CPU:0"
   attr {
     key: "N"
     value {
-      i: 3
+      i: 2
     }
   }
   attr {
@@ -12659,7 +11836,6 @@ node {
   op: "Reshape"
   input: "report_uninitialized_variables/Const"
   input: "report_uninitialized_variables/boolean_mask/concat"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -12688,7 +11864,6 @@ node {
 node {
   name: "report_uninitialized_variables/boolean_mask/Reshape_1/shape"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -12727,7 +11902,6 @@ node {
   op: "Reshape"
   input: "report_uninitialized_variables/LogicalNot"
   input: "report_uninitialized_variables/boolean_mask/Reshape_1/shape"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -12757,13 +11931,6 @@ node {
   name: "report_uninitialized_variables/boolean_mask/Where"
   op: "Where"
   input: "report_uninitialized_variables/boolean_mask/Reshape_1"
-  device: "/device:CPU:0"
-  attr {
-    key: "T"
-    value {
-      type: DT_BOOL
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -12784,7 +11951,6 @@ node {
   name: "report_uninitialized_variables/boolean_mask/Squeeze"
   op: "Squeeze"
   input: "report_uninitialized_variables/boolean_mask/Where"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -12817,7 +11983,6 @@ node {
   op: "Gather"
   input: "report_uninitialized_variables/boolean_mask/Reshape"
   input: "report_uninitialized_variables/boolean_mask/Squeeze"
-  device: "/device:CPU:0"
   attr {
     key: "Tindices"
     value {
@@ -12852,7 +12017,6 @@ node {
 node {
   name: "report_uninitialized_resources/Const"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13475,7 +12639,6 @@ node {
   input: "report_uninitialized_variables_1/IsVariableInitialized_15"
   input: "report_uninitialized_variables_1/IsVariableInitialized_16"
   input: "report_uninitialized_variables_1/IsVariableInitialized_17"
-  device: "/device:CPU:0"
   attr {
     key: "N"
     value {
@@ -13511,7 +12674,6 @@ node {
   name: "report_uninitialized_variables_1/LogicalNot"
   op: "LogicalNot"
   input: "report_uninitialized_variables_1/stack"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13528,7 +12690,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/Const"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13582,7 +12743,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/Shape"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13619,7 +12779,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/strided_slice/stack"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13656,7 +12815,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/strided_slice/stack_1"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13693,7 +12851,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/strided_slice/stack_2"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13734,7 +12891,6 @@ node {
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice/stack"
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice/stack_1"
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice/stack_2"
-  device: "/device:CPU:0"
   attr {
     key: "Index"
     value {
@@ -13762,7 +12918,7 @@ node {
   attr {
     key: "begin_mask"
     value {
-      i: 0
+      i: 1
     }
   }
   attr {
@@ -13793,7 +12949,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/Prod/reduction_indices"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13832,7 +12987,6 @@ node {
   op: "Prod"
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice"
   input: "report_uninitialized_variables_1/boolean_mask/Prod/reduction_indices"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -13864,7 +13018,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/Shape_1"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13901,7 +13054,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/strided_slice_1/stack"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13930,7 +13082,7 @@ node {
             size: 1
           }
         }
-        int_val: 0
+        int_val: 1
       }
     }
   }
@@ -13938,7 +13090,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/strided_slice_1/stack_1"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -13975,7 +13126,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/strided_slice_1/stack_2"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -14016,217 +13166,6 @@ node {
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice_1/stack"
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice_1/stack_1"
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice_1/stack_2"
-  device: "/device:CPU:0"
-  attr {
-    key: "Index"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "T"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "begin_mask"
-    value {
-      i: 1
-    }
-  }
-  attr {
-    key: "ellipsis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "end_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "new_axis_mask"
-    value {
-      i: 0
-    }
-  }
-  attr {
-    key: "shrink_axis_mask"
-    value {
-      i: 0
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables_1/boolean_mask/Shape_2"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 18
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables_1/boolean_mask/strided_slice_2/stack"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables_1/boolean_mask/strided_slice_2/stack_1"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 0
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables_1/boolean_mask/strided_slice_2/stack_2"
-  op: "Const"
-  device: "/device:CPU:0"
-  attr {
-    key: "_output_shapes"
-    value {
-      list {
-        shape {
-          dim {
-            size: 1
-          }
-        }
-      }
-    }
-  }
-  attr {
-    key: "dtype"
-    value {
-      type: DT_INT32
-    }
-  }
-  attr {
-    key: "value"
-    value {
-      tensor {
-        dtype: DT_INT32
-        tensor_shape {
-          dim {
-            size: 1
-          }
-        }
-        int_val: 1
-      }
-    }
-  }
-}
-node {
-  name: "report_uninitialized_variables_1/boolean_mask/strided_slice_2"
-  op: "StridedSlice"
-  input: "report_uninitialized_variables_1/boolean_mask/Shape_2"
-  input: "report_uninitialized_variables_1/boolean_mask/strided_slice_2/stack"
-  input: "report_uninitialized_variables_1/boolean_mask/strided_slice_2/stack_1"
-  input: "report_uninitialized_variables_1/boolean_mask/strided_slice_2/stack_2"
-  device: "/device:CPU:0"
   attr {
     key: "Index"
     value {
@@ -14282,10 +13221,9 @@ node {
   }
 }
 node {
-  name: "report_uninitialized_variables_1/boolean_mask/concat/values_1"
+  name: "report_uninitialized_variables_1/boolean_mask/concat/values_0"
   op: "Pack"
   input: "report_uninitialized_variables_1/boolean_mask/Prod"
-  device: "/device:CPU:0"
   attr {
     key: "N"
     value {
@@ -14320,7 +13258,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/concat/axis"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -14351,15 +13288,13 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/concat"
   op: "ConcatV2"
+  input: "report_uninitialized_variables_1/boolean_mask/concat/values_0"
   input: "report_uninitialized_variables_1/boolean_mask/strided_slice_1"
-  input: "report_uninitialized_variables_1/boolean_mask/concat/values_1"
-  input: "report_uninitialized_variables_1/boolean_mask/strided_slice_2"
   input: "report_uninitialized_variables_1/boolean_mask/concat/axis"
-  device: "/device:CPU:0"
   attr {
     key: "N"
     value {
-      i: 3
+      i: 2
     }
   }
   attr {
@@ -14392,7 +13327,6 @@ node {
   op: "Reshape"
   input: "report_uninitialized_variables_1/Const"
   input: "report_uninitialized_variables_1/boolean_mask/concat"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -14421,7 +13355,6 @@ node {
 node {
   name: "report_uninitialized_variables_1/boolean_mask/Reshape_1/shape"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -14460,7 +13393,6 @@ node {
   op: "Reshape"
   input: "report_uninitialized_variables_1/LogicalNot"
   input: "report_uninitialized_variables_1/boolean_mask/Reshape_1/shape"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -14490,13 +13422,6 @@ node {
   name: "report_uninitialized_variables_1/boolean_mask/Where"
   op: "Where"
   input: "report_uninitialized_variables_1/boolean_mask/Reshape_1"
-  device: "/device:CPU:0"
-  attr {
-    key: "T"
-    value {
-      type: DT_BOOL
-    }
-  }
   attr {
     key: "_output_shapes"
     value {
@@ -14517,7 +13442,6 @@ node {
   name: "report_uninitialized_variables_1/boolean_mask/Squeeze"
   op: "Squeeze"
   input: "report_uninitialized_variables_1/boolean_mask/Where"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -14550,7 +13474,6 @@ node {
   op: "Gather"
   input: "report_uninitialized_variables_1/boolean_mask/Reshape"
   input: "report_uninitialized_variables_1/boolean_mask/Squeeze"
-  device: "/device:CPU:0"
   attr {
     key: "Tindices"
     value {
@@ -14595,15 +13518,10 @@ node {
   op: "NoOp"
 }
 node {
-  name: "init_3"
-  op: "NoOp"
-}
-node {
   name: "group_deps_1"
   op: "NoOp"
   input: "^init_2"
   input: "^init_all_tables"
-  input: "^init_3"
 }
 node {
   name: "Merge/MergeSummary"
@@ -14616,7 +13534,7 @@ node {
   input: "dnn/dnn/hiddenlayer_2_activation"
   input: "dnn/dnn/logits_fraction_of_zero_values"
   input: "dnn/dnn/logits_activation"
-  input: "loss"
+  input: "dnn/multi_class_head/ScalarSummary"
   attr {
     key: "N"
     value {
@@ -14688,7 +13606,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_41f703ed6eb643f8add4768062718dca/part"
+        string_val: "_temp_612c8a85324143458f7fe2d9d26549d6/part"
       }
     }
   }
@@ -14753,7 +13671,6 @@ node {
 node {
   name: "save/ShardedFilename/shard"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -14787,7 +13704,6 @@ node {
   input: "save/StringJoin"
   input: "save/ShardedFilename/shard"
   input: "save/num_shards"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -14801,7 +13717,6 @@ node {
 node {
   name: "save/SaveV2/tensor_names"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -14855,7 +13770,6 @@ node {
 node {
   name: "save/SaveV2/shape_and_slices"
   op: "Const"
-  device: "/device:CPU:0"
   attr {
     key: "_output_shapes"
     value {
@@ -14930,7 +13844,6 @@ node {
   input: "dnn/multi_class_head/dnn/dnn/logits/weights/part_0/Adagrad/read"
   input: "dnn/multi_class_head/dnn/learning_rate"
   input: "global_step"
-  device: "/device:CPU:0"
   attr {
     key: "dtypes"
     value {
@@ -14962,7 +13875,6 @@ node {
   op: "Identity"
   input: "save/ShardedFilename"
   input: "^save/SaveV2"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -14992,7 +13904,6 @@ node {
   op: "Pack"
   input: "save/ShardedFilename"
   input: "^save/control_dependency"
-  device: "/device:CPU:0"
   attr {
     key: "N"
     value {
@@ -15029,7 +13940,6 @@ node {
   op: "MergeV2Checkpoints"
   input: "save/MergeV2Checkpoints/checkpoint_prefixes"
   input: "save/Const"
-  device: "/device:CPU:0"
   attr {
     key: "delete_old_dirs"
     value {
@@ -15043,7 +13953,6 @@ node {
   input: "save/Const"
   input: "^save/control_dependency"
   input: "^save/MergeV2Checkpoints"
-  device: "/device:CPU:0"
   attr {
     key: "T"
     value {
@@ -15143,9 +14052,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 10
-          }
+          unknown_rank: true
         }
       }
     }
@@ -15286,9 +14193,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 10
-          }
+          unknown_rank: true
         }
       }
     }
@@ -15429,12 +14334,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 35
-          }
-          dim {
-            size: 10
-          }
+          unknown_rank: true
         }
       }
     }
@@ -15578,12 +14478,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 35
-          }
-          dim {
-            size: 10
-          }
+          unknown_rank: true
         }
       }
     }
@@ -15727,9 +14622,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 20
-          }
+          unknown_rank: true
         }
       }
     }
@@ -15870,9 +14763,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 20
-          }
+          unknown_rank: true
         }
       }
     }
@@ -16013,12 +14904,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 10
-          }
-          dim {
-            size: 20
-          }
+          unknown_rank: true
         }
       }
     }
@@ -16162,12 +15048,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 10
-          }
-          dim {
-            size: 20
-          }
+          unknown_rank: true
         }
       }
     }
@@ -16311,9 +15192,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -16454,9 +15333,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -16597,12 +15474,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 20
-          }
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -16746,12 +15618,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 20
-          }
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -16895,9 +15762,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -17038,9 +15903,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -17181,12 +16044,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 5
-          }
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -17330,12 +16188,7 @@ node {
     value {
       list {
         shape {
-          dim {
-            size: 5
-          }
-          dim {
-            size: 5
-          }
+          unknown_rank: true
         }
       }
     }
@@ -17700,5 +16553,5 @@ node {
   input: "^save/restore_shard"
 }
 versions {
-  producer: 24
+  producer: 21
 }
