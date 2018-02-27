@@ -159,6 +159,7 @@ print('---------------------------')
 
 X_train=total#_inputs
 y_train=total_output
+print ("ytrain   ### " , y_train)
 
 #X_traiINPUT_SHAPEn, y_train , X_test, y_test
 #X_train, X_test, y_train , y_test = train_test_split(total_inputs, total_output, test_size=0.15, random_state=42)
@@ -227,6 +228,8 @@ sess.run(tf.global_variables_initializer())
 tbCallBack = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
 esCallBack = EarlyStopping(monitor='val_acc', min_delta=0, patience=12, verbose=0, mode='max')
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=0.001)
+
+print ("ytrain   ### " , y_train)
 
 history = model.fit(X_train, y_train,#],y_train], 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
