@@ -71,9 +71,12 @@ class RJPGNet:
         conv2=Activation("relu")(conv2)
         channels=Dropout(0.40)(conv2)
         lstmsVec=[]
+        
+            
         for x in range(0,nlstms):
             filterImg=Lambda(lambda element : independentFilters(element=element,filterIndex=x))(channels)
-            lstm=Bidirectional(LSTM(50),merge_mode='concat')(filterImg)
+            lstm=Bidirectional(LSTM(50,return_sequences=True),merge_mode='concat')(filterImg)
+            lstmsVec.append(lstm)
             #lstm=LSTM(50,stateful=True)(filterImg) #batch_shape=(512, 7, 5)
             #denselayers=Dense(400)(lstm)
             #denselayers=Activation("relu")(denselayers)
@@ -81,8 +84,10 @@ class RJPGNet:
             #denselayers=Dense(150)(denselayers)
             #denselayers=Activation("relu")(denselayers)
             #denselayers=Dropout(0.8)(denselayers)
-            classificationLayer=Dense(classes)(lstm)
+            channels=Flatten()(lstm)
+            classificationLayer=Dense(classes)(channels)
             classificationLayer=Activation("softmax")(classificationLayer)
+            
             lstmsVec.append(classificationLayer)
         #base example for 2 lstms     
         #x0 = Lambda(lambda x : x[:,0,:,:])(out1)
@@ -95,10 +100,45 @@ class RJPGNet:
         
         # a softmax classifier
         #classificationLayer=Dense(classes)(merged)
+        #channels=Flatten()(channels)
+        #classificationLayer=Dense(classes)(channels)
         #classificationLayer=Activation("softmax")(classificationLayer)
         
-        #model=Model(inputNet,classificationLayer)
-        model=Model(inputNet,lstmsVec)
+        model=Model(inputNet,classificationLayer)
+        #model=Model(inputNet,lstmsVec)
+        return model
+
+
+class LeNet:
+    @staticmethod
+    def build(input_shape, classes):
+        model = Sequential()
+        # CONV => RELU => POOL
+        # kernel size (width, height) default (2,5)
+        model.add(Conv2D(20, kernel_size=(2,5), padding="same",
+            input_shape=input_shape))
+        model.add(Activation("relu"))
+        # pool size - down scale int factor (vertical, horizontal)
+        model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1)))
+        # CONV => RELU => POOL
+        
+        model.add(Conv2D(50, kernel_size=(3,3), padding="same"))
+        model.add(Activation("relu"))
+        model.add(MaxPooling2D(pool_size=(1, 2), strides=(1, 1))) #1,2
+        model.summary()
+        model.add(Dropout(0.40))
+        # Flatten => RELU layers
+        model.add(Flatten())
+        model.add(Dense(400))
+        model.add(Activation("relu"))
+        model.add(Dropout(0.5))
+        model.add(Dense(150))
+        model.add(Activation("relu"))
+        model.add(Dropout(0.8))
+        # a softmax classifier
+        model.add(Dense(classes))
+        model.add(Activation("softmax"))
+        #model.add(Dropout(0.3)) # not logical to do droput on last layer with softmax 
         return model
        
 #------------- load Data ----------------
@@ -209,8 +249,9 @@ y_train = np_utils.to_categorical(y_train, NB_CLASSES)
 #y_test = np_utils.to_categorical(y_test, NB_CLASSES)
 
 # initialize the optimizer and model
-model = RJPGNet.build(timeSteps=7,variables=5,classes=5,nlstms=3)
+model = RJPGNet.build(timeSteps=7,variables=5,classes=5,nlstms=1)
 #model = LSTMNet.build(timeSteps=7,variables=5,classes=5)
+#model = LeNet.build(input_shape=INPUT_SHAPE, classes=NB_CLASSES)
 
 model.summary()
 model.compile(loss="categorical_crossentropy", optimizer=OPTIMIZER,
@@ -231,7 +272,7 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2,patience=5, min_lr=
 
 print ("ytrain   ### " , y_train)
 
-history = model.fit(X_train, y_train,#],y_train], 
+history = model.fit(X_train, y_train,# ,y_train,y_train], 
 		batch_size=BATCH_SIZE, epochs=NB_EPOCH, 
 		verbose=1, # 0 for no logging to stdout, 1 for progress bar logging, 2 for one log line per epoch.
 		validation_split=VALIDATION_SPLIT, callbacks=[tbCallBack,reduce_lr])#,esCallBack])
