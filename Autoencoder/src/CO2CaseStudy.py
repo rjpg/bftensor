@@ -180,7 +180,7 @@ scaled = scaler.fit_transform(values)
 # specify the number of lag hours
 n_hours = 64
 n_features = 8
-N_hours_ahead = 16
+N_hours_ahead = 1
 # frame as supervised learning
 reframed = series_to_supervised(scaled, n_hours, N_hours_ahead)
 print(reframed.shape)
