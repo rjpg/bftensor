@@ -74,9 +74,9 @@ autoencoder.fit(x_train, x_train,
 # do not train encoding 
 for layer in encoderHstack.layers : layer.trainable = False
 
-inputNet = Input(shape=(7,10),batch_shape=(20, 7, 5)) 
+#inputNet = Input(shape=(7,10),batch_shape=(20, 7, 5)) 
         #lstm=Bidirectional(LSTM(100,recurrent_dropout=0.4,dropout=0.4),merge_mode='concat')(inputNet) #worse using stateful=True
-lstm=Bidirectional(LSTM(50),merge_mode='concat')(inputNet) #worse using stateful=True 
+#lstm=Bidirectional(LSTM(50),merge_mode='concat')(inputNet) #worse using stateful=True 
         #denselayers=Dense(400)(lstm)
         #denselayers=Activation("relu")(denselayers)
         #denselayers=Dropout(0.5)(denselayers)
@@ -84,10 +84,10 @@ lstm=Bidirectional(LSTM(50),merge_mode='concat')(inputNet) #worse using stateful
         #denselayers=Activation("relu")(denselayers)
         #denselayers=Dropout(0.8)(denselayers)
         # a softmax classifier
-classificationLayer=Dense(classes,activation='softmax')(lstm)
+#classificationLayer=Dense(classes,activation='softmax')(lstm)
 #classificationLayer=Activation("softmax")(classificationLayer)
         
-model=Model(inputNet,classificationLayer)
+#model=Model(inputNet,classificationLayer)
 
 decoded_imgs = autoencoder.predict(x_test)
 
