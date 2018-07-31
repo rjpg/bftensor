@@ -80,6 +80,7 @@ class CylindricalPad(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
+
 class LeNet:
     @staticmethod
     def build(timeSteps,variables,classes):
