@@ -4,6 +4,8 @@ Created on 23/12/2017
 @author: rjpg
 '''
 
+import pydot
+
 from keras import backend as K
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D
 from keras.layers.core import Activation, Lambda, Dropout 
@@ -73,9 +75,9 @@ modeltest.summary()
 
 plot_model(modeltest, to_file="model.png",show_shapes=True)
 
-from IPython.display import SVG,display
-from keras.utils.vis_utils import model_to_dot
-modelSVG=SVG(model_to_dot(modeltest).create(prog='dot', format='svg'))
-display(modelSVG)
+#from IPython.display import SVG,display
+#from keras.utils.vis_utils import model_to_dot
+#modelSVG=SVG(model_to_dot(modeltest).create(prog='dot', format='svg'))
+#display(modelSVG)
 
 

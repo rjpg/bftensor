@@ -52,13 +52,41 @@ def transform3(elementA, n=2):
     result=np.concatenate((lastColumns,result),axis=3)
     return result
 
-def transform4(elementA, n=2):
+def transform4(testElement, n=2, m=0):
     firstColumns=testElement[:,:,:,0:n]
     lastColumns=testElement[:,:,:,testElement.shape[3]-n:testElement.shape[3]]
+    
+    print("fc",firstColumns.shape)
+    print("lc",lastColumns.shape)
+    
     result=tf.concat([testElement,firstColumns], axis=3)
     #result=np.concatenate((testElement,firstColumns),axis=3)
     result=tf.concat([lastColumns,result], axis=3)
     #result=np.concatenate((lastColumns,result),axis=3)
+    
+    tf.fill([result.shape[0],result.shape[1],m,result.shape[3]],0.)
+    if m != 0 :
+    #    y=tf.fill([result.shape[0],result.shape[1],m,result.shape[3]],0.)
+       
+    #    x = tf.placeholder(result.dtype, shape=[result.shape[0],result.shape[1],m,result.shape[3]])
+    #    y = tf.zeros_like(x)
+    
+    #    result=tf.concat([y,result], axis=2)
+    #    result=tf.concat([result,y], axis=2)
+        
+        firstRows=result[:,:,0:m,:]
+            
+        y = tf.fill(tf.shape(firstRows), 0.)
+            
+        #y = tf.constant(0, shape=[result.shape[0],result.shape[1],m,result.shape[3]],dtype=result.dtype)
+        #y = tf.zeros_like(x,dtype=result.dtype)
+        #y =tf.cast( tf.fill(tf.shape(x), 0.) ,result.dtype)
+        
+        result=tf.concat([y,result], axis=2)
+        result=tf.concat([result,y], axis=2)
+        
+    
+               
     return result
 
 
@@ -68,7 +96,7 @@ testElement= np.array([[[[1.,2,3],[4,5,6],[7,8,9],[10,11,12]],
                         [[1,2,3],[4,5,6],[7,8,9],[10,11,12]]],
                         
                         [[[10,20,30],[40,50,60],[70,80,90],[100,110,120]],
-                        [[10,20,30],[40,50,60],[70,80,90],[100,110,120]]] ])
+                        [[10,20,30],[40,50,60],[70,80,90],[100,110,120]]] ],dtype=np.float32)
 
 testElement[:,:,]
 
@@ -77,7 +105,7 @@ print(testElement.shape)
 print(testElement)
 
 print("--calling transform--")
-testElementTranformed = transform4(testElement, n=2)
+testElementTranformed = transform4(testElement, n=2,m=2)
 print("-- End calling transform--")
 
 # print tensor to confirm

@@ -82,7 +82,7 @@ for x in df.columns:
 
 print(inputs)
 
-total_inputs,total_output = df.as_matrix(inputs).astype(np.float32),df.as_matrix([target]).astype(np.int32)
+total_inputs,total_output = df.as_matrix(inputs).astype(np.float32),df.as_matrix([35]).astype(np.int32)
 
 print(total_inputs)
 
@@ -186,7 +186,7 @@ for x in df_test.columns:
 
 
 
-X_test, y_test = df_test.as_matrix(inputs_test).astype(np.float32),df_test.as_matrix([target_test]).astype(np.int32)
+X_test, y_test = df_test.as_matrix(inputs_test).astype(np.float32),df_test.as_matrix([35]).astype(np.int32)
 
 X_test = np.reshape(X_test, (-1,5,7))
 
