@@ -1,3 +1,3 @@
 # bftensor
 
-betfair exchange in UK horse racing price prediction pre-live. 
+Testing models for betfair exchange in UK horse racing private dataset. Price prediction pre-live. 
